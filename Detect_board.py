@@ -7,9 +7,11 @@ def pre_processing(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_blur = cv2.GaussianBlur(img_gray, (5, 5), 1)
     img_canny = cv2.Canny(img_blur, 200, 200)
+    # cv2.imshow("Canny", cv2.resize(img_canny, (img_canny.shape[1]//2, img_canny.shape[0]//2)))
     kernel = np.ones((5, 5))
-    img_dial = cv2.dilate(img_canny, kernel, iterations=3)
+    img_dial = cv2.dilate(img_canny, kernel, iterations=2)
     img_thresh = cv2.erode(img_dial, kernel, iterations=1)
+    # cv2.imshow("Thresh", cv2.resize(img_thresh, (img_thresh.shape[1] // 2, img_thresh.shape[0] // 2)))
     return img_thresh
 
 
@@ -42,12 +44,14 @@ def reorder(my_points):
 
 def get_warp(img, new_c):
     pts_src = np.float32(new_c)
-    pts_dst = np.float32([[0, 0], [Constants.WIDTH_FRAME, 0], [0, Constants.HEIGHT_FRAME],
-                          [Constants.WIDTH_FRAME, Constants.HEIGHT_FRAME]])
+    # for p in pts_src:
+    #     print(sum(sum(new_c)))
+    #     cv2.circle(img, (p[0][0], p[0][1]), 1, (0, 0, 255))
+    (x, y, w, h) = cv2.boundingRect(new_c)
+    pts_dst = np.float32([[0, 0], [w, 0], [0, h], [w, h]])
     matrix = cv2.getPerspectiveTransform(pts_src, pts_dst)
-    img_output = cv2.warpPerspective(img, matrix, (Constants.WIDTH_FRAME, Constants.HEIGHT_FRAME))
-    img_cropped = img_output[40:img_output.shape[0] - 40, 25:img_output.shape[1] - 25]
-    img_cropped = cv2.resize(img_cropped, (Constants.WIDTH_FRAME, Constants.HEIGHT_FRAME))
+    img_warped = cv2.warpPerspective(img, matrix, (w, h))
+    img_cropped = img_warped[5: h-5, 5: w-5]
     return img_cropped
 
 
