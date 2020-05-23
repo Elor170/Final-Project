@@ -1,10 +1,13 @@
 import cv2
 import imutils
+import numpy as np
+import Const
 from skimage.metrics import structural_similarity
-import Constants
 
 
 def scan_board(b_img, a_img, counter, case, board):
+    is_written = False
+    is_new_board_added = False
     a_img = cv2.resize(a_img, (b_img.shape[1], b_img.shape[0]))
     gray_b = cv2.cvtColor(b_img, cv2.COLOR_RGB2GRAY)
     gray_a = cv2.cvtColor(a_img, cv2.COLOR_RGB2GRAY)
@@ -25,8 +28,8 @@ def scan_board(b_img, a_img, counter, case, board):
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
 
-        x_min = Constants.WIDTH_FRAME
-        y_min = Constants.HEIGHT_FRAME
+        x_min = Const.WIDTH_FRAME
+        y_min = Const.HEIGHT_FRAME
         x_max = 0
         y_max = 0
 
@@ -38,43 +41,65 @@ def scan_board(b_img, a_img, counter, case, board):
             area = cv2.contourArea(c)
             if area > 100:
                 (x, y, w, h) = cv2.boundingRect(c)
-                cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                if x < x_min:
-                    x_min = x
-                if y < y_min:
-                    y_min = y
-                if x + w > x_max:
-                    x_max = x + w
-                if y + h > y_max:
-                    y_max = y + h
+                img_canny_b = cv2.Canny(b_img[y: y + h, x: x + w], 50, 150)
+                sum_before = sum(sum(img_canny_b))
+                print("Before: ", str(sum_before))
+                img_canny_a = cv2.Canny(a_img[y: y + h, x: x + w], 50, 150)
+                sum_after = sum(sum(img_canny_a))
+                print("After: ", str(sum_after))
+                # case writing
+                if sum_after > 10:
+                    is_written = True
+                    if x < x_min:
+                        x_min = x
+                    if y < y_min:
+                        y_min = y
+                    if x + w > x_max:
+                        x_max = x + w
+                    if y + h > y_max:
+                        y_max = y + h
+                    # writing on empty board
+                    if sum_before < 10:
+                        cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    # writing on nonempty board
+                    else:
+                        cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
+                        cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
+                        if case is Const.APPEND_CASE and not is_new_board_added:
+                            is_new_board_added = True
+                            cv2.imwrite("Output/Board%d.jpg" % counter, board)
+                            board = np.full((board.shape[0], board.shape[1], 3), 125, dtype=np.uint8)
+                            counter += 1
 
-                # cv2.imshow("Before", cv2.threshold(gray_b[y: y+h, x: x+w], 127, 255, cv2.THRESH_BINARY))
-                # cv2.imshow("After", cv2.threshold(gray_a[y: y+h, x: x+w], 127, 255, cv2.THRESH_BINARY))
-                # print("Before", sum(sum(gray_b[y: y+h, x: x+w])), "\nAfter:", sum(sum(gray_a[y: y+h, x: x+w])))
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
+                # case erasing
+                else:
+                    cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+                cv2.imshow("Lesson", cv2.resize(a_img_copy, (a_img_copy.shape[1] // 2, a_img_copy.shape[0] // 2)))
+                cv2.waitKey(100)
+        cv2.waitKey(2000)
         # show the output images
-        # cv2.imshow("Original", gray_b)
-        # cv2.imshow("Modified", gray_a)
+        # cv2.imshow("Lesson", cv2.resize(a_img_copy, (a_img_copy.shape[1] // 2, a_img_copy.shape[0] // 2)))
+        # cv2.imshow("Lesson_b", cv2.resize(b_img_copy, (b_img_copy.shape[1] // 2, b_img_copy.shape[0] // 2)))
         # cv2.imshow("Diff", diff)
         # cv2.imshow("Thresh", thresh)
 
-        cv2.imshow("Lesson", cv2.resize(a_img_copy, (a_img_copy.shape[1] // 2, a_img_copy.shape[0] // 2)))
-        cv2.imshow("Lesson_b", cv2.resize(b_img_copy, (b_img_copy.shape[1] // 2, b_img_copy.shape[0] // 2)))
+        if is_written:
+            cut = a_img[y_min:y_max, x_min:x_max]
 
-        cut = a_img[y_min:y_max, x_min:x_max]
+            if case is Const.SEPARATE_CASE:
+                cv2.imshow("Was cut from the board", cv2.resize(cut, (cut.shape[1] // 2, cut.shape[0] // 2)))
+                cv2.imwrite("Output/Part%d.jpg" % counter, cut)
+                counter += 1
 
-        if case is Constants.SEPARATE_CASE:
-            cv2.imshow("Cut", cv2.resize(cut, (cut.shape[1] // 2, cut.shape[0] // 2)))
-            cv2.imwrite("Output/Board%d.jpg" % counter, cut)
-            counter += 1
+            elif case is Const.APPEND_CASE:
+                board[y_min:y_max, x_min:x_max] = cut
+                cv2.imshow("Added to the board", cv2.resize(board, (board.shape[1] // 2, board.shape[0] // 2)))
 
-        if case is Constants.APPEND_CASE:
-            board[y_min:y_max, x_min:x_max] = cut
-            cv2.imshow("Added to board", board)
+            cv2.waitKey(2000)
 
-        # cv2.waitKey(2000)
         cv2.destroyAllWindows()
     return counter, board
 

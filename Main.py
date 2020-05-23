@@ -1,5 +1,5 @@
 import cv2
-import Constants
+import Const
 from Scan_board import scan_board
 from Detect_board import detect_board
 import numpy as np
@@ -8,7 +8,7 @@ import numpy as np
 path = 'Resources/Lesson_1.mp4'
 cap = cv2.VideoCapture(path)
 
-case = Constants.SEPARATE_CASE
+case = Const.SEPARATE_CASE
 is_first = True
 is_first_scan = True
 is_writing = True
@@ -32,13 +32,13 @@ while success:
     # while not write
     else:
         time_no_write += 1
-        cv2.circle(processed_frame, (20, 20), 10, (255, 255, 0), -1)
+        cv2.circle(processed_frame, (20, 20), 10, (0, 255, 0), -1)
         # first frame
         if is_first:
             is_first = False
             before_frame = processed_frame
         # scan the board
-        elif time_no_write > Constants.FPS and not is_scanned:
+        elif time_no_write > Const.FPS and not is_scanned:
             after_frame = processed_frame
             if is_first_scan:
                 board = np.full((before_frame.shape[0], before_frame.shape[1], 3), 125, dtype=np.uint8)
@@ -50,11 +50,11 @@ while success:
     w = processed_frame.shape[1]//2
     cv2.imshow("Lesson", cv2.resize(processed_frame, (w, h)))
     success, original_frame = cap.read()
-    if cv2.waitKey(1) & 0xFF == Constants.ESC_KEY_BOARD:
+    if cv2.waitKey(1) & 0xFF == Const.ESC_KEY_BOARD:
         break
 
-if case is Constants.APPEND_CASE:
-    cv2.imwrite("Output/Board.jpg", board)
+if case is Const.APPEND_CASE:
+    cv2.imwrite("Output/Board%d.jpg" % counter, board)
 
 cap.release()
 cv2.destroyAllWindows()
