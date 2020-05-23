@@ -1,6 +1,6 @@
 import cv2
 import requests
-import Constants
+import Const
 import numpy as np
 from Scan_board import scan_board
 from Detect_board import detect_board
@@ -18,7 +18,7 @@ while True:
     frame_resp = requests.get(url)
     frame_arr = np.array(bytearray(frame_resp.content), dtype=np.uint8)
     original_frame = cv2.imdecode(frame_arr, -1)
-    original_frame = cv2.resize(original_frame, (Constants.HEIGHT_FRAME, Constants.WIDTH_FRAME))
+    original_frame = cv2.resize(original_frame, (Const.HEIGHT_FRAME, Const.WIDTH_FRAME))
     processed_frame, is_writing, new_coordinates = detect_board(original_frame, old_coordinates)
     # while write
     if is_writing:
@@ -43,7 +43,7 @@ while True:
             is_scanned = True
 
     cv2.imshow("Lesson", processed_frame)
-    if cv2.waitKey(1) & 0xFF == Constants.ESC_KEY_BOARD:
+    if cv2.waitKey(1) & 0xFF == Const.ESC_KEY_BOARD:
         break
 
 cv2.destroyAllWindows()
