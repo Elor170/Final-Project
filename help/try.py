@@ -9,7 +9,7 @@ def empty(val):
     pass
 
 # video source
-path = 'Resources/Lesson_1.mp4'
+path = '../Resources/Lesson_1.mp4'
 cap = cv2.VideoCapture(path)
 cv2.namedWindow("Image")
 cv2.createTrackbar("Min_TB", 'Image', 0, 255, empty)
