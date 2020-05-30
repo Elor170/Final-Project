@@ -5,7 +5,7 @@ from Detect_board import detect_board
 import numpy as np
 
 # video source
-path = 'Resources/Lesson_1.mp4'
+path = 'Resources/Lesson_2.mp4'
 cap = cv2.VideoCapture(path)
 
 case = Const.SEPARATE_CASE

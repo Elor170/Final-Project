@@ -77,7 +77,11 @@ def scan_board(b_img, a_img, counter, case, board):
                     cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-                cv2.imshow("Lesson", cv2.resize(a_img_copy, (a_img_copy.shape[1] // 2, a_img_copy.shape[0] // 2)))
+                img_u = np.concatenate((a_img_copy,  b_img_copy), axis=1)
+                img_u = cv2.resize(img_u, (img_u.shape[1] // 2, img_u.shape[0] // 2))
+                cv2.imshow('Lesson', img_u)
+                # cv2.imshow("Lesson", cv2.resize(a_img_copy, (a_img_copy.shape[1] // 2, a_img_copy.shape[0] // 2)))
+                # cv2.imshow("Before", cv2.resize(b_img_copy, (b_img_copy.shape[1] // 2, b_img_copy.shape[0] // 2)))
                 cv2.waitKey(100)
         cv2.waitKey(2000)
         # show the output images
@@ -98,8 +102,7 @@ def scan_board(b_img, a_img, counter, case, board):
                 board[y_min:y_max, x_min:x_max] = cut
                 cv2.imshow("Added to the board", cv2.resize(board, (board.shape[1] // 2, board.shape[0] // 2)))
 
-            cv2.waitKey(2000)
-
+        cv2.waitKey(0)
         cv2.destroyAllWindows()
     return counter, board
 
