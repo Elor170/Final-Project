@@ -8,7 +8,7 @@ import numpy as np
 path = 'Resources/Lesson_2.mp4'
 cap = cv2.VideoCapture(path)
 
-case = Const.SEPARATE_CASE
+case = Const.APPEND_CASE
 is_first = True
 is_first_scan = True
 is_writing = True
