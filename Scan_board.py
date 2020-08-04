@@ -1,7 +1,7 @@
 import cv2
-import imutils
-import numpy as np
 import Const
+import numpy as np
+import imutils
 from skimage.metrics import structural_similarity
 
 
@@ -66,7 +66,7 @@ def scan_board(b_img, a_img, counter, case, board):
                     else:
                         cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
                         cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
-                        if case is Const.APPEND_CASE and not is_new_board_added:
+                        if case is Const.APPEND_OPTION and not is_new_board_added:
                             is_new_board_added = True
                             cv2.imwrite("Output/Board%d.jpg" % counter, board)
                             board = np.full((board.shape[0], board.shape[1], 3), 125, dtype=np.uint8)
@@ -93,16 +93,16 @@ def scan_board(b_img, a_img, counter, case, board):
         if is_written:
             cut = a_img[y_min:y_max, x_min:x_max]
 
-            if case is Const.SEPARATE_CASE:
+            if case is Const.SEPARATE_OPTION:
                 cv2.imshow("Was cut from the board", cv2.resize(cut, (cut.shape[1] // 2, cut.shape[0] // 2)))
                 cv2.imwrite("Output/Part%d.jpg" % counter, cut)
                 counter += 1
 
-            elif case is Const.APPEND_CASE:
+            elif case is Const.APPEND_OPTION:
                 board[y_min:y_max, x_min:x_max] = cut
                 cv2.imshow("Added to the board", cv2.resize(board, (board.shape[1] // 2, board.shape[0] // 2)))
 
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
         cv2.destroyAllWindows()
     return counter, board
 

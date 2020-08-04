@@ -1,28 +1,36 @@
 import cv2
 import Const
+import numpy as np
 from Scan_board import scan_board
 from Detect_board import detect_board
-import numpy as np
+
 
 # video source
-path = 'Resources/Lesson_2.mp4'
-cap = cv2.VideoCapture(path)
+path: str = 'Resources/Lesson_2.mp4'
+cap: cv2.VideoCapture = cv2.VideoCapture(path)
 
-case = Const.APPEND_CASE
-is_first = True
-is_first_scan = True
-is_writing = True
-is_scanned = True
-time_no_write = 0
-counter = 1
+scan_option: int = Const.APPEND_OPTION
+
+# initialize variables
+time_no_write: int = 0
+counter: int = 1
+is_first: bool = True
+is_first_scan: bool = True
+is_writing: bool = True
+is_scanned: bool = True
+
 processed_frame = None
 before_frame = None
 after_frame = None
 board = None
-success, original_frame = cap.read()
 
-while success:
+there_more_frame: bool
+original_frame: np.ndarray
+there_more_frame, original_frame = cap.read()
+
+while there_more_frame:
     processed_frame, is_writing = detect_board(original_frame)
+
     # while write
     if is_writing:
         time_no_write = 0
@@ -43,17 +51,17 @@ while success:
             if is_first_scan:
                 board = np.full((before_frame.shape[0], before_frame.shape[1], 3), 125, dtype=np.uint8)
                 is_first_scan = False
-            counter, board = scan_board(before_frame, after_frame, counter, case, board)
+            counter, board = scan_board(before_frame, after_frame, counter, scan_option, board)
             before_frame = after_frame
             is_scanned = True
     h = processed_frame.shape[0]//2
     w = processed_frame.shape[1]//2
     cv2.imshow("Lesson", cv2.resize(processed_frame, (w, h)))
-    success, original_frame = cap.read()
+    there_more_frame, original_frame = cap.read()
     if cv2.waitKey(1) & 0xFF == Const.ESC_KEY_BOARD:
         break
 
-if case is Const.APPEND_CASE:
+if scan_option is Const.APPEND_OPTION:
     cv2.imwrite("Output/Board%d.jpg" % counter, board)
 
 cap.release()

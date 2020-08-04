@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import Const
-from Detect_board import get_contours
+from Detect_board import get_coordinates
 from Detect_board import reorder
 
 
