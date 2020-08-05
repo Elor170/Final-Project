@@ -1,9 +1,10 @@
 import numpy as np
 
-APPEND_CASE = 1
-SEPARATE_CASE = 2
-WIDTH_FRAME = 640
-HEIGHT_FRAME = 480
-ESC_KEY_BOARD = 27
-KERNEL = np.ones((5, 5))
-FPS = 30
+
+APPEND_OPTION: int = 1
+SEPARATE_OPTION: int = 2
+WIDTH_FRAME: int = 640
+HEIGHT_FRAME: int = 480
+ESC_KEY_BOARD: int = 27
+KERNEL: np.ndarray = np.ones((5, 5))
+FPS: int = 30    # frames per second
