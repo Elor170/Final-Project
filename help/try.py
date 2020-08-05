@@ -67,3 +67,9 @@ cv2.waitKey(0)
 #         break
 # cv2.imwrite("out.jpg", tb_img)
 # cv2.destroyAllWindows()
+
+# show the output images- after 85
+        # cv2.imshow("Lesson", cv2.resize(a_img_copy, (a_img_copy.shape[1] // 2, a_img_copy.shape[0] // 2)))
+        # cv2.imshow("Lesson_b", cv2.resize(b_img_copy, (b_img_copy.shape[1] // 2, b_img_copy.shape[0] // 2)))
+        # cv2.imshow("Diff", diff)
+        # cv2.imshow("Thresh", thresh)
