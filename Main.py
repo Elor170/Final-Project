@@ -6,10 +6,10 @@ from Detect_board import detect_board
 
 
 # video source
-path: str = 'Resources/Lesson_1.mp4'
+path: str = 'Resources/Lesson_2.mp4'
 cap: cv2.VideoCapture = cv2.VideoCapture(path)
 
-scan_option: int = Const.APPEND_OPTION
+scan_option: int = Const.SEPARATE_OPTION
 
 # initialize variables
 time_no_write: int = 0
