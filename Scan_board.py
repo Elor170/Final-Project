@@ -5,6 +5,15 @@ import imutils
 from skimage.metrics import structural_similarity
 
 
+def create_new_board(option, is_new_board_added, counter, board):
+    if option is Const.APPEND_OPTION and not is_new_board_added:
+        is_new_board_added = True
+        cv2.imwrite("Output/Board%d.jpg" % counter, board)
+        board = np.full((board.shape[0], board.shape[1], 3), 125, dtype=np.uint8)
+        counter += 1
+    return is_new_board_added, counter, board
+
+
 # b_img = the image before, a_img = the image after 
 def scan_board(b_img, a_img, counter, option, board=None):
     # preprocessing
@@ -67,15 +76,12 @@ def scan_board(b_img, a_img, counter, option, board=None):
                         cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
                         # save the last board and create new one
-                        if option is Const.APPEND_OPTION and not is_new_board_added:
-                            is_new_board_added = True
-                            cv2.imwrite("Output/Board%d.jpg" % counter, board)
-                            board = np.full((board.shape[0], board.shape[1], 3), 125, dtype=np.uint8)
-                            counter += 1
+                        is_new_board_added, counter, board = create_new_board(option, is_new_board_added, counter, board)
 
                 else:   # erasing - red box
                     cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    is_new_board_added, counter, board = create_new_board(option, is_new_board_added, counter, board)
 
                 # show before-after images
                 images_union = np.concatenate((a_img_copy,  b_img_copy), axis=1)
