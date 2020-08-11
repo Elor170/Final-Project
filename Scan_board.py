@@ -5,24 +5,29 @@ import imutils
 from skimage.metrics import structural_similarity
 
 
-def create_new_board(option, is_new_board_added, counter, board):
+def create_new_board(main_window, output_path, option, is_new_board_added, counter, board):
     if option is Const.APPEND_OPTION and not is_new_board_added:
         is_new_board_added = True
-        cv2.imwrite("Output/Board%d.jpg" % counter, board)
+        try:
+            write_check = cv2.imwrite(output_path + "/Board%d.jpg" % counter, board)
+            if not write_check:
+                raise NameError("The output path is invalid - output will not be saved")
+        except Exception as e:
+            main_window.output_error(e)
+
         board = np.full((board.shape[0], board.shape[1], 3), 125, dtype=np.uint8)
         counter += 1
     return is_new_board_added, counter, board
 
 
 # b_img = the image before, a_img = the image after 
-def scan_board(b_img, a_img, counter, option, board=None):
+def scan_board(main_window, output_path, b_img, a_img, counter, option, board=None):
     # preprocessing
     is_something_written: bool = False
     is_new_board_added: bool = False
 
     a_img = cv2.resize(a_img, (b_img.shape[1], b_img.shape[0]))
     a_img_copy: np.ndarray = a_img.copy()
-    b_img_copy: np.ndarray = b_img.copy()
 
     b_gray: np.ndarray = cv2.cvtColor(b_img, cv2.COLOR_RGB2GRAY)
     a_gray: np.ndarray = cv2.cvtColor(a_img, cv2.COLOR_RGB2GRAY)
@@ -68,25 +73,22 @@ def scan_board(b_img, a_img, counter, option, board=None):
                         y_max = y + h
 
                     if sum_before < 10:     # the area was empty before writing - green box
-                        cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
                         cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                     else:   # the area was not empty before writing - yellow box
-                        cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
                         cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
                         # save the last board and create new one
-                        is_new_board_added, counter, board = create_new_board(option, is_new_board_added, counter, board)
+                        is_new_board_added, counter, board = \
+                            create_new_board(main_window, output_path, option, is_new_board_added, counter, board)
 
                 else:   # erasing - red box
-                    cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                    is_new_board_added, counter, board = create_new_board(option, is_new_board_added, counter, board)
+                    is_new_board_added, counter, board = \
+                        create_new_board(main_window, output_path, option, is_new_board_added, counter, board)
 
-                # show before-after images
-                images_union = np.concatenate((a_img_copy,  b_img_copy), axis=1)
-                images_union = cv2.resize(images_union, (images_union.shape[1] // 2, images_union.shape[0] // 2))
-                cv2.imshow('Lesson', images_union)
+                # show image
+                main_window.set_board_img(a_img_copy.copy())
                 cv2.waitKey(100)
         cv2.waitKey(2000)
 
@@ -94,13 +96,19 @@ def scan_board(b_img, a_img, counter, option, board=None):
             cut = a_img[y_min:y_max, x_min:x_max]
 
             if option is Const.SEPARATE_OPTION:
-                cv2.imshow("Was cut from the board", cv2.resize(cut, (cut.shape[1] // 2, cut.shape[0] // 2)))
-                cv2.imwrite("Output/Part%d.jpg" % counter, cut)
+                main_window.set_board_img(cut.copy())
+                try:
+                    write_check = cv2.imwrite(output_path + "/Part%d.jpg" % counter, cut)
+                    if not write_check:
+                        raise NameError("The output path is invalid - output will not be saved")
+                except Exception as e:
+                    main_window.output_error(e)
+
                 counter += 1
 
             elif option is Const.APPEND_OPTION:
                 board[y_min:y_max, x_min:x_max] = cut
-                cv2.imshow("Added to the board", cv2.resize(board, (board.shape[1] // 2, board.shape[0] // 2)))
+                main_window.set_board_img(board.copy())
 
         cv2.waitKey(1000)
         cv2.destroyAllWindows()
