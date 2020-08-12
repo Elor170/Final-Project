@@ -156,11 +156,8 @@ class MainWindow(QMainWindow):
         self.outputTL.setText(str(error_string))
 
 
-def gui_main():
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = MainWindow()
     win.show()
     sys.exit(app.exec_())
-
-
-gui_main()
