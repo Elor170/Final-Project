@@ -7,8 +7,7 @@ def pre_processing(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_blur = cv2.GaussianBlur(img_gray, (5, 5), 1)
     img_canny = cv2.Canny(img_blur, 200, 200)
-    img_dilation = cv2.dilate(img_canny, Const.KERNEL, iterations=2)
-    img_threshold = cv2.erode(img_dilation, Const.KERNEL, iterations=1)
+    img_threshold = cv2.dilate(img_canny, Const.KERNEL, iterations=3)
     return img_threshold
 
 
@@ -51,7 +50,7 @@ def get_warp(img, coordinates):
     points_dst = np.float32([[0, 0], [w, 0], [0, h], [w, h]])
     matrix = cv2.getPerspectiveTransform(points_src, points_dst)
     img_warped = cv2.warpPerspective(img, matrix, (w, h))
-    img_cropped = img_warped[5: h-5, 5: w-5]
+    img_cropped = img_warped[10: h-10, 10: w-10]
     return img_cropped
 
 
