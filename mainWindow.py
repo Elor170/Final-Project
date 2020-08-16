@@ -2,9 +2,7 @@ import sys
 import Const
 from Process_video import process_video
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from tkinter import Tk
-from tkinter import filedialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 
 
 class MainWindow(QMainWindow):
@@ -139,14 +137,11 @@ class MainWindow(QMainWindow):
         self.boardImg.setPixmap(pixmap)
 
     def select_file(self):
-        Tk().withdraw()
-        file_path = filedialog.askopenfilename()
+        file_path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\', "Video files (*.mp4 *.avi)")[0]
         self.sourceTL.setText(file_path)
 
     def select_folder(self):
-        root = Tk()
-        root.withdraw()
-        folder_path = filedialog.askdirectory()
+        folder_path = QFileDialog.getExistingDirectory()
         self.outputTL.setText(folder_path)
 
     def source_error(self, error_string):
