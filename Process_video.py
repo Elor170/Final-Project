@@ -1,8 +1,23 @@
 import cv2
 import Const
 import numpy as np
+from PIL import Image
 from Scan_board import scan_board
 from Detect_board import detect_board
+
+
+def images2pdf(path, option, counter):
+    image_list = []
+    img_name = ""
+    if option == Const.SEPARATE_OPTION:
+        img_name = 'Part'
+    elif option == Const.APPEND_OPTION:
+        img_name = 'Board'
+    for i in range(1, counter):
+        image_list.append(Image.open(path + '\\' + img_name + str(i) + '.jpg'))
+
+    first_image = image_list.pop(0)
+    first_image.save(path + '\\PDF_Collection.pdf', save_all=True, append_images=image_list)
 
 
 def process_video(main_window, source, output_path, scan_option, source_option):
@@ -100,10 +115,11 @@ def process_video(main_window, source, output_path, scan_option, source_option):
     if scan_option is Const.APPEND_OPTION:
         try:
             write_check = cv2.imwrite(output_path + "/Board%d.jpg" % counter, board)
+            counter += 1
             if not write_check:
                 raise NameError("The output path is invalid - output will not be saved")
         except Exception as e:
             main_window.output_error(e)
 
     cap.release()
-    cv2.destroyAllWindows()
+    images2pdf(output_path, scan_option, counter)
