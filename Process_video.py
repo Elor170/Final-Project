@@ -77,12 +77,12 @@ def process_video(main_window, source, output_path, scan_option, source_option):
         # while not write - green circle
         else:
             time_no_write += 1
-            cv2.circle(processed_frame, (20, 20), 10, (0, 255, 0), -1)
+            # cv2.circle(processed_frame, (20, 20), 10, (0, 255, 0), -1)
 
             # first frame
             if is_first_frame:
                 is_first_frame = False
-                frame_before = processed_frame
+                frame_before = processed_frame.copy()
 
             # scan the board
             elif time_no_write > Const.FPS and not is_frame_scanned:
@@ -99,8 +99,10 @@ def process_video(main_window, source, output_path, scan_option, source_option):
                 else:  # SEPARATE_OPTION
                     counter, _ = scan_board(main_window, output_path, frame_before, frame_after, counter, scan_option)
 
-                frame_before = frame_after
+                frame_before = frame_after.copy()
                 is_frame_scanned = True
+
+            cv2.circle(processed_frame, (20, 20), 10, (0, 255, 0), -1)
 
         # show the video
         main_window.set_board_img(processed_frame.copy())

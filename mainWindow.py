@@ -1,5 +1,6 @@
 import sys
 import Const
+import numpy as np
 from Process_video import process_video
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
@@ -132,7 +133,20 @@ class MainWindow(QMainWindow):
         # convert and set the image
         h = current_img.shape[0]
         w = current_img.shape[1]
-        q_image = QtGui.QImage(current_img.data, w, h, 3 * w, QtGui.QImage.Format_BGR888)
+
+        ratio = h/w
+        fixed_h = h
+        fixed_w = w
+
+        if ratio > 3/4:
+            fixed_w = round((4/3) * h)
+        elif ratio < 3/4:
+            fixed_h = round((3/4) * w)
+
+        fixed_img = np.full((fixed_h, fixed_w, 3), 125, dtype=np.uint8)
+        fixed_img[(fixed_h - h) // 2: h + (fixed_h - h) // 2, (fixed_w - w) // 2: w + (fixed_w - w) // 2] = current_img
+
+        q_image = QtGui.QImage(fixed_img.data, fixed_w, fixed_h, 3 * fixed_w, QtGui.QImage.Format_BGR888)
         pixmap = QtGui.QPixmap(q_image)
         self.boardImg.setPixmap(pixmap)
 
