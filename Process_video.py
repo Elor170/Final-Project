@@ -124,4 +124,5 @@ def process_video(main_window, source, output_path, scan_option, source_option):
             main_window.output_error(e)
 
     cap.release()
-    images2pdf(output_path, scan_option, counter)
+    if counter > 1:
+        images2pdf(output_path, scan_option, counter)
