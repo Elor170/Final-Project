@@ -28,6 +28,7 @@ def scan_board(main_window, output_path, b_img, a_img, counter, option, board=No
 
     a_img = cv2.resize(a_img, (b_img.shape[1], b_img.shape[0]))
     a_img_copy: np.ndarray = a_img.copy()
+    b_img_copy: np.ndarray = b_img.copy()
 
     b_gray: np.ndarray = cv2.cvtColor(b_img, cv2.COLOR_RGB2GRAY)
     a_gray: np.ndarray = cv2.cvtColor(a_img, cv2.COLOR_RGB2GRAY)
@@ -74,9 +75,11 @@ def scan_board(main_window, output_path, b_img, a_img, counter, option, board=No
 
                     if sum_before < 10:     # the area was empty before writing - green box
                         cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                     else:   # the area was not empty before writing - yellow box
                         cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
+                        cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
                         # save the last board and create new one
                         is_new_board_added, counter, board = \
@@ -84,19 +87,26 @@ def scan_board(main_window, output_path, b_img, a_img, counter, option, board=No
 
                 else:   # erasing - red box
                     cv2.rectangle(a_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    cv2.rectangle(b_img_copy, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     is_new_board_added, counter, board = \
                         create_new_board(main_window, output_path, option, is_new_board_added, counter, board)
 
-                # show image
-                main_window.set_board_img(a_img_copy.copy())
+                # show before image
+                b_img_copy[y:y+h, x:x+w] = a_img_copy[y:y+h, x:x+w]
+                main_window.set_board_img(cv2.putText(b_img_copy, "Before", (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
+                                                      1, (255, 0, 0), 2, cv2.LINE_AA))
                 cv2.waitKey(100)
+        # show after image
+        main_window.set_board_img(cv2.putText(a_img_copy, "After", (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
+                                              1, (255, 0, 0), 2, cv2.LINE_AA))
         cv2.waitKey(2000)
 
         if is_something_written:
             cut = a_img[y_min:y_max, x_min:x_max]
 
             if option is Const.SEPARATE_OPTION:
-                main_window.set_board_img(cut.copy())
+                main_window.set_board_img(
+                    cv2.putText(cut.copy(), "Cut", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA))
                 try:
                     write_check = cv2.imwrite(output_path + "/Part%d.jpg" % counter, cut)
                     if not write_check:
@@ -108,8 +118,9 @@ def scan_board(main_window, output_path, b_img, a_img, counter, option, board=No
 
             elif option is Const.APPEND_OPTION:
                 board[y_min:y_max, x_min:x_max] = cut
-                main_window.set_board_img(board.copy())
+                main_window.set_board_img(
+                    cv2.putText(board.copy(), "Board", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA))
 
-        cv2.waitKey(1000)
+        cv2.waitKey(2000)
         cv2.destroyAllWindows()
     return counter, board
